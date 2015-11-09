@@ -10,7 +10,7 @@ Tests for `orthoexon` module.
 
 import unittest
 
-from orthoexon import orthoexon
+#from orthoexon import orthoexon
 
 
 class TestOrthoexon(unittest.TestCase):
