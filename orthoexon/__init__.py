@@ -70,8 +70,8 @@ def translate(exon, fasta):
     if exon.strand == '-':
         exonSeq = exonSeq.reverse_complement()
     exonProtein = exonSeq[exonFrame:].translate(to_stop=True)
-    print("{}:{}-{}:{}\t{}\t{}".format(exon.chrom, exon.start, exon.stop,
-                                       exon.frame, exonSeq, exonProtein))
+    #print("{}:{}-{}:{} {}\t{}\t{}".format(exon.chrom, exon.start, exon.stop,
+    #                                exon.frame, exon.strand, exonSeq, exonProtein))
     return exonProtein
 
 
@@ -99,27 +99,27 @@ def orthoexon():
 
 
     #dataframe for proteins
-    species1proteindf = pd.DataFrame(columns=['Human Proteins', 'Human Gene Id',
-                                              'Exon Id'])
-    species2proteindf = pd.DataFrame(columns=['Mouse Proteins', 'Mouse Gene Id',
-                                              'Exon Id'])
+    #species1proteindf = pd.DataFrame(columns=['Human Proteins', 'Human Gene Id',
+    #                                          'Exon Id'])
+    #species2proteindf = pd.DataFrame(columns=['Mouse Proteins', 'Mouse Gene Id',
+    #                                          'Exon Id'])
     proteindf = pd.DataFrame(columns=['Proteins', 'Gene Id', 'Exon Id'])
 
     #for each human gene in gffutils database get gene id
-    n_matching = 0
+    #n_matching = 0
     for index, species1gene in enumerate(species1DB.features_of_type('gene')):
         species1GFFUtilsGeneId = str(species1gene['gene_id'])
         species1GeneId = separate(species1GFFUtilsGeneId)
         if(index % 10 == 0):
             print(index)
 
-        if n_matching > 0:
-            break
+        #if n_matching > 0:
+        #    break
 
         #if gene ID equals one from ensembl, get mouse gene ID & exons at point
         try:
             species1EnsGeneId = comparaGeneIdIndex.loc[species1GeneId]
-            n_matching += 1
+        #    n_matching += 1
         except KeyError:
             continue
 
@@ -127,8 +127,10 @@ def orthoexon():
             if (species1GeneId == newCompara.iat[x, 1]):
                 species2EnsGeneId = newCompara.iat[x, 3]
         #get human exons
-        for species1Exon in species1DB.children(species1gene, featuretype =
-                                                'CDS', order_by = 'start'):
+        for species1Exon in species1DB.children(species1gene,
+                                                featuretype = 'CDS',
+                                                order_by = 'start'):
+            #print(species1Exon.chrom)
             species1ExonProtein = translate(species1Exon, species1Fasta)
 
             #create table with protein seq, geneId and exon Id
@@ -166,10 +168,11 @@ def orthoexon():
         #drop duplicates for protein seq
         newproteindf = proteindf.drop_duplicates('Exon Id')
         finalproteindf = newproteindf.reset_index()
-        transferArray = transferarray(finalproteindf.size, finalproteindf)
+        arraytransfer = transferarray(finalproteindf.size, finalproteindf)
+        print(arraytransfer)
 
         #output_handle = open("humanProteins_{}.fasta".format(str(humanGeneId)), "w")
-        #SeqIO.write(transferArray, output_handle, "fasta")
+        #SeqIO.write(arraytransfer, output_handle, "fasta")
         #output_handle.close()
 
         #Reset the protein dataframe
