@@ -5,10 +5,6 @@ __email__ = 'jlettes@ucsd.edu'
 __version__ = '0.1.0'
 
 
-#def helloworld():
-#    print("Hello World?????")
-
-
 #imports
 #for gffutils database
 import gffutils
@@ -29,13 +25,21 @@ from Bio.SeqRecord import SeqRecord
 
 
 #import gffutils databases and Ensembl compare data as a table
-#species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//gencode.v19.annotation.gtf.db', keep_order=True)
-#species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//gencode.v19.annotation.chrX.gtf.db', keep_order=True)
+#species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
+#                                '//gencode.v19.annotation.gtf.db',
+#                                keep_order=True)
+#species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
+#                                '//gencode.v19.annotation.chrX.gtf.db',
+#                                keep_order=True)
 species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
                              'gencode.v19.annotation.humanrbfox2andfmr1.gtf.db'
                              , keep_order=True)
-#species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//gencode.vM5.annotation.gtf.db', keep_order=True)
-#species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//gencode.vM5.annotation.chrX.gtf.db', keep_order=True)
+#species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
+#                                '//gencode.vM5.annotation.gtf.db',
+#                                keep_order=True)
+#species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
+#                                '//gencode.vM5.annotation.chrX.gtf.db',
+#                                keep_order=True)
 species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
                              'gencode.v19.annotation.mouserbfox2andfmr1.gtf.db'
                              , keep_order=True)
@@ -71,7 +75,8 @@ def translate(exon, fasta):
         exonSeq = exonSeq.reverse_complement()
     exonProtein = exonSeq[exonFrame:].translate(to_stop=True)
     #print("{}:{}-{}:{} {}\t{}\t{}".format(exon.chrom, exon.start, exon.stop,
-    #                                exon.frame, exon.strand, exonSeq, exonProtein))
+    #                                      exon.frame, exon.strand, exonSeq,
+    #                                      exonProtein))
     return exonProtein
 
 
@@ -89,7 +94,8 @@ def transferarray(proteindfsize, finalproteindf):
 
 
 def orthoexon():
-    #def orthoexon(species1DB, species2DB, compara, species1Fasta, species2Fasta):
+    #def orthoexon(species1DB, species2DB, compara, species1Fasta,
+    # species2Fasta):
     #Drop compara duplicates
     dropDuplicates = compara.drop_duplicates(['Ensembl Gene ID',
                                           'Ensembl Gene ID.1'])
@@ -99,32 +105,23 @@ def orthoexon():
 
 
     #dataframe for proteins
-    #species1proteindf = pd.DataFrame(columns=['Human Proteins', 'Human Gene Id',
-    #                                          'Exon Id'])
-    #species2proteindf = pd.DataFrame(columns=['Mouse Proteins', 'Mouse Gene Id',
-    #                                          'Exon Id'])
     proteindf = pd.DataFrame(columns=['Proteins', 'Gene Id', 'Exon Id'])
 
     #for each human gene in gffutils database get gene id
-    #n_matching = 0
     for index, species1gene in enumerate(species1DB.features_of_type('gene')):
         species1GFFUtilsGeneId = str(species1gene['gene_id'])
-        species1GeneId = separate(species1GFFUtilsGeneId)
-        if(index % 10 == 0):
-            print(index)
-
-        #if n_matching > 0:
-        #    break
+        species1geneid = separate(species1GFFUtilsGeneId)
+        #if(index % 10 == 0):
+        print(index)
 
         #if gene ID equals one from ensembl, get mouse gene ID & exons at point
         try:
-            species1EnsGeneId = comparaGeneIdIndex.loc[species1GeneId]
-        #    n_matching += 1
+            species1EnsGeneId = comparaGeneIdIndex.loc[species1geneid]
         except KeyError:
             continue
 
         for x in range (0, numcompara):
-            if (species1GeneId == newCompara.iat[x, 1]):
+            if (species1geneid == newCompara.iat[x, 1]):
                 species2EnsGeneId = newCompara.iat[x, 3]
         #get human exons
         for species1Exon in species1DB.children(species1gene,
@@ -134,9 +131,11 @@ def orthoexon():
             species1ExonProtein = translate(species1Exon, species1Fasta)
 
             #create table with protein seq, geneId and exon Id
-            appendproteindf = pd.DataFrame({'Proteins' : [str(species1ExonProtein)],
-                                            'Gene Id' : [str(species1GeneId)],
-                                            'Exon Id' : [str(species1Exon['exon_id']
+            appendproteindf = pd.DataFrame({'Proteins' :
+                                                [str(species1ExonProtein)],
+                                            'Gene Id' : [str(species1geneid)],
+                                            'Exon Id' : [str(species1Exon
+                                                             ['exon_id']
                                                          [0])]})
             proteindf = proteindf.append(appendproteindf, ignore_index=True)
 
@@ -146,34 +145,37 @@ def orthoexon():
         #for each mouse gene ID from database
         for species2gene in species2DB.features_of_type('gene'):
             species2GFFUtilsGeneId = str(species2gene['gene_id']) #gffutils id
-            species2GeneId = separate(species2GFFUtilsGeneId)
-            if (species2EnsGeneId == species2GeneId):
+            species2geneid = separate(species2GFFUtilsGeneId)
+            if (species2EnsGeneId == species2geneid):
                 for species2Exon in species2DB.children(species2gene,
                                                     featuretype = 'CDS',
                                                     order_by = 'start'):
-                    species2ExonProtein = translate(species2Exon, species2Fasta)
+                    species2ExonProtein = translate(species2Exon,
+                                                    species2Fasta)
 
                     #create dataframe with protein seq, geneId and exon Id
-                    appendproteindf = pd.DataFrame({'Proteins' :
-                                                        [str(species2ExonProtein)],
+                    appendproteindf=pd.DataFrame({'Proteins'
+                                                  : [str(species2ExonProtein)],
                                                 'Gene Id' :
-                                                     [str(species2GeneId)],
+                                                     [str(species2geneid)],
                                                 'Exon Id' : [str(species2Exon
                                                                     ['exon_id']
                                                                     [0])]})
 
-                    proteindf = proteindf.append(appendproteindf, ignore_index=True)
+                    proteindf = proteindf.append(appendproteindf,
+                                                 ignore_index=True)
 
 
         #drop duplicates for protein seq
         newproteindf = proteindf.drop_duplicates('Exon Id')
         finalproteindf = newproteindf.reset_index()
         arraytransfer = transferarray(finalproteindf.size, finalproteindf)
-        print(arraytransfer)
 
-        #output_handle = open("humanProteins_{}.fasta".format(str(humanGeneId)), "w")
-        #SeqIO.write(arraytransfer, output_handle, "fasta")
-        #output_handle.close()
+        #Write to FASTA
+        output_handle = open('Human Gene {} - Mouse Gene {}.fasta'.format
+                             (str(species1geneid),str(species2EnsGeneId)), "w")
+        SeqIO.write(arraytransfer, output_handle, "fasta")
+        output_handle.close()
 
         #Reset the protein dataframe
         proteindf = pd.DataFrame(columns=['Proteins', 'Gene Id', 'Exon Id'])
