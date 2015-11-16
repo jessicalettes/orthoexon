@@ -28,17 +28,11 @@ from Bio.SeqRecord import SeqRecord
 #species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
 #                                '//gencode.v19.annotation.gtf.db',
 #                                keep_order=True)
-#species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
-#                                '//gencode.v19.annotation.chrX.gtf.db',
-#                                keep_order=True)
 species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
                              'gencode.v19.annotation.humanrbfox2andfmr1.gtf.db'
                              , keep_order=True)
 #species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
 #                                '//gencode.vM5.annotation.gtf.db',
-#                                keep_order=True)
-#species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
-#                                '//gencode.vM5.annotation.chrX.gtf.db',
 #                                keep_order=True)
 species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
                              'gencode.v19.annotation.mouserbfox2andfmr1.gtf.db'
@@ -94,8 +88,6 @@ def transferarray(proteindfsize, finalproteindf):
 
 
 def orthoexon():
-    #def orthoexon(species1DB, species2DB, compara, species1Fasta,
-    # species2Fasta):
     #Drop compara duplicates
     dropDuplicates = compara.drop_duplicates(['Ensembl Gene ID',
                                           'Ensembl Gene ID.1'])
@@ -106,6 +98,7 @@ def orthoexon():
 
     #dataframe for proteins
     proteindf = pd.DataFrame(columns=['Proteins', 'Gene Id', 'Exon Id'])
+    saveproteindf = pd.DataFrame(columns=['Proteins', 'Gene Id', 'Exon Id'])
 
     #for each human gene in gffutils database get gene id
     for index, species1gene in enumerate(species1DB.features_of_type('gene')):
@@ -116,7 +109,7 @@ def orthoexon():
 
         #if gene ID equals one from ensembl, get mouse gene ID & exons at point
         try:
-            species1EnsGeneId = comparaGeneIdIndex.loc[species1geneid]
+            species1ensgeneid = comparaGeneIdIndex.loc[species1geneid]
         except KeyError:
             continue
 
@@ -127,7 +120,6 @@ def orthoexon():
         for species1Exon in species1DB.children(species1gene,
                                                 featuretype = 'CDS',
                                                 order_by = 'start'):
-            #print(species1Exon.chrom)
             species1ExonProtein = translate(species1Exon, species1Fasta)
 
             #create table with protein seq, geneId and exon Id
@@ -165,10 +157,14 @@ def orthoexon():
                     proteindf = proteindf.append(appendproteindf,
                                                  ignore_index=True)
 
+                    saveproteindf = saveproteindf.append(appendproteindf,
+                                                         ignore_index=True)
 
         #drop duplicates for protein seq
-        newproteindf = proteindf.drop_duplicates('Exon Id')
+        newproteindf = proteindf.drop_duplicates('Proteins')
         finalproteindf = newproteindf.reset_index()
+        saveproteindf = saveproteindf.drop_duplicates('Exon Id')
+
         arraytransfer = transferarray(finalproteindf.size, finalproteindf)
 
         #Write to FASTA
@@ -179,3 +175,8 @@ def orthoexon():
 
         #Reset the protein dataframe
         proteindf = pd.DataFrame(columns=['Proteins', 'Gene Id', 'Exon Id'])
+    print(saveproteindf)
+
+
+    saveproteindf.to_csv("AllExons.csv", columns= ['Reset Index', 'Proteins', 'Gene Id',
+                                                'Exon Id'])
