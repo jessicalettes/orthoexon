@@ -4,6 +4,7 @@ __author__ = 'Jessica Lettes'
 __email__ = 'jlettes@ucsd.edu'
 __version__ = '0.1.0'
 
+import sys
 
 #imports
 #for gffutils database
@@ -75,13 +76,13 @@ def translate(exon, fasta):
 
 
 # to make an array of all exons to make FASTA file
-def transferarray(proteindfsize, finalproteindf):
-    transferArray = []
-    for x in range (0, int((proteindfsize/4))):
-        transferArray.append(x)
-        transferArray[x] = SeqRecord(Seq(finalproteindf.iat[x,3]),
-                                     finalproteindf.iat[x,1], description='')
-    return transferArray
+def make_sequence_array(finalproteindf):
+    sequence_array = []
+    for index, row in finalproteindf.iterrows():
+        # sequence_array.append(x)
+        sequence_array.append(
+            SeqRecord(Seq(row['Proteins']), id=row['Exon ID'], description=''))
+    return sequence_array
 
 
 
@@ -95,6 +96,8 @@ def orthoexon(species1name, species2name, species1DB, species2DB, compara, speci
     comparaGeneIdIndex = newCompara.set_index('Ensembl Gene ID')
     numcompara = int((newCompara.size/5))
 
+
+    gene_dfs = []
 
     #dataframe for proteins
     data = []
@@ -144,18 +147,27 @@ def orthoexon(species1name, species2name, species1DB, species2DB, compara, speci
                            str(species2Exon['exon_id'][0])]
                     data.append(row)
 
-        proteindf = pd.DataFrame(data, columns=['Species', 'Proteins', 'Gene Id', 'Exon Id'])
+        proteindf = pd.DataFrame(data, columns=['Species', 'Proteins',
+                                                'Gene ID', 'Exon ID'])
         #drop duplicates for protein seq
         proteindf_noduplicates = proteindf.drop_duplicates('Proteins')
 
-        sequencearray = transferarray(proteindf_noduplicates.size, proteindf_noduplicates)
+        sequencearray = make_sequence_array(proteindf_noduplicates)
 
         #Write to FASTA
-        output_handle = open('Human Gene {} - Mouse Gene {}.fasta'.format
-                             (str(species1geneid),str(species2EnsGeneId)), "w")
+        output_filename = '{}_Gene_{}-{}_Gene_{}.fasta'.format(
+            species1name, str(species1geneid), species2name,
+            str(species2EnsGeneId))
+        sys.stdout.write('Writing sequences to "{}" ...\n'.format(output_filename))
+        output_handle = open(output_filename, "w")
         SeqIO.write(sequencearray, output_handle, "fasta")
         output_handle.close()
+        sys.stdout.write('\tDone.\n')
 
+        gene_dfs.append(proteindf)
+    all_gene_dfs = pd.concat(gene_dfs, ignore_index=True)
+    all_gene_dfs = all_gene_dfs.drop_duplicates()
+    return all_gene_dfs
 
     #saveproteindf.to_csv("AllExons.csv", columns= ['Reset Index', 'Proteins', 'Gene Id',
     #                                            'Exon Id'])
