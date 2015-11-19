@@ -146,21 +146,15 @@ def orthoexon(species1name, species2name, species1DB, species2DB, compara, speci
 
         proteindf = pd.DataFrame(data, columns=['Species', 'Proteins', 'Gene Id', 'Exon Id'])
         #drop duplicates for protein seq
-        newproteindf = proteindf.drop_duplicates('Proteins')
-        finalproteindf = newproteindf.reset_index()
-        savedroppedproteindf = saveproteindf.drop_duplicates('Exon Id')
+        proteindf_noduplicates = proteindf.drop_duplicates('Proteins')
 
-        arraytransfer = transferarray(finalproteindf.size, finalproteindf)
+        sequencearray = transferarray(proteindf_noduplicates.size, proteindf_noduplicates)
 
         #Write to FASTA
         output_handle = open('Human Gene {} - Mouse Gene {}.fasta'.format
                              (str(species1geneid),str(species2EnsGeneId)), "w")
-        SeqIO.write(arraytransfer, output_handle, "fasta")
+        SeqIO.write(sequencearray, output_handle, "fasta")
         output_handle.close()
-
-        #Reset the protein dataframe
-        proteindf = pd.DataFrame(columns=['Species', 'Proteins', 'Gene Id', 'Exon Id'])
-    print(saveproteindf)
 
 
     #saveproteindf.to_csv("AllExons.csv", columns= ['Reset Index', 'Proteins', 'Gene Id',
