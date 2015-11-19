@@ -87,7 +87,7 @@ def transferarray(proteindfsize, finalproteindf):
 
 
 
-def orthoexon():
+def orthoexon(species1name, species2name, species1DB, species2DB, compara, species1Fasta, species2Fasta):
     #Drop compara duplicates
     dropDuplicates = compara.drop_duplicates(['Ensembl Gene ID',
                                           'Ensembl Gene ID.1'])
@@ -97,8 +97,7 @@ def orthoexon():
 
 
     #dataframe for proteins
-    proteindf = pd.DataFrame(columns=['Proteins', 'Gene Id', 'Exon Id'])
-    saveproteindf = pd.DataFrame(columns=['Proteins', 'Gene Id', 'Exon Id'])
+    data = []
 
     #for each human gene in gffutils database get gene id
     for index, species1gene in enumerate(species1DB.features_of_type('gene')):
@@ -122,15 +121,10 @@ def orthoexon():
                                                 order_by = 'start'):
             species1ExonProtein = translate(species1Exon, species1Fasta)
 
+            row = [species1name, str(species1ExonProtein), str(species1geneid),
+                   str(species1Exon['exon_id'][0])]
+            data.append(row)
             #create table with protein seq, geneId and exon Id
-            appendproteindf = pd.DataFrame({'Proteins' :
-                                                [str(species1ExonProtein)],
-                                            'Gene Id' : [str(species1geneid)],
-                                            'Exon Id' : [str(species1Exon
-                                                             ['exon_id']
-                                                         [0])]})
-            proteindf = proteindf.append(appendproteindf, ignore_index=True)
-
 
 
         #CHECK THIS!
@@ -146,24 +140,15 @@ def orthoexon():
                                                     species2Fasta)
 
                     #create dataframe with protein seq, geneId and exon Id
-                    appendproteindf=pd.DataFrame({'Proteins'
-                                                  : [str(species2ExonProtein)],
-                                                'Gene Id' :
-                                                     [str(species2geneid)],
-                                                'Exon Id' : [str(species2Exon
-                                                                    ['exon_id']
-                                                                    [0])]})
+                    row = [species2name, str(species2ExonProtein), str(species2geneid),
+                           str(species2Exon['exon_id'][0])]
+                    data.append(row)
 
-                    proteindf = proteindf.append(appendproteindf,
-                                                 ignore_index=True)
-
-                    saveproteindf = saveproteindf.append(appendproteindf,
-                                                         ignore_index=True)
-
+        proteindf = pd.DataFrame(data, columns=['Species', 'Proteins', 'Gene Id', 'Exon Id'])
         #drop duplicates for protein seq
         newproteindf = proteindf.drop_duplicates('Proteins')
         finalproteindf = newproteindf.reset_index()
-        saveproteindf = saveproteindf.drop_duplicates('Exon Id')
+        savedroppedproteindf = saveproteindf.drop_duplicates('Exon Id')
 
         arraytransfer = transferarray(finalproteindf.size, finalproteindf)
 
@@ -174,9 +159,11 @@ def orthoexon():
         output_handle.close()
 
         #Reset the protein dataframe
-        proteindf = pd.DataFrame(columns=['Proteins', 'Gene Id', 'Exon Id'])
+        proteindf = pd.DataFrame(columns=['Species', 'Proteins', 'Gene Id', 'Exon Id'])
     print(saveproteindf)
 
 
-    saveproteindf.to_csv("AllExons.csv", columns= ['Reset Index', 'Proteins', 'Gene Id',
-                                                'Exon Id'])
+    #saveproteindf.to_csv("AllExons.csv", columns= ['Reset Index', 'Proteins', 'Gene Id',
+    #                                            'Exon Id'])
+    #savedroppedproteindf.to_csv("AlldroppedExons.csv", columns= ['Reset Index', 'Proteins', 'Gene Id',
+    #                                            'Exon Id'])
