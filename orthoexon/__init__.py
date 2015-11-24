@@ -36,17 +36,21 @@ species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
 #                                '//gencode.vM5.annotation.gtf.db',
 #                                keep_order=True)
 species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
-                             'gencode.v19.annotation.mouserbfox2andfmr1.gtf.db'
+                             'gencode.vM5.annotation.mouserbfox2andfmr1.gtf.db'
                              , keep_order=True)
 compara = pd.read_table('/Users/rhythmicstar/projects/exon_evolution/'
                         'EnsemblHumanMouse.txt')
 
 #Fasta files with sequence
-species1Fasta ='/Users/rhythmicstar/projects/exon_evolution//' \
-               'GRCh37.p13.genome.fa'
-species2Fasta ='/Users/rhythmicstar/projects/exon_evolution//' \
-               'GRCm38.p3.genome.fa'
+#species1Fasta ='/Users/rhythmicstar/projects/exon_evolution//' \
+#               'GRCh37.p13.genome.fa'
+species1Fasta = '/Users/rhythmicstar/projects/exon_evolution//GRCh37.p13.' \
+                'genome.x22.fa'
 
+#species2Fasta ='/Users/rhythmicstar/projects/exon_evolution//' \
+#               'GRCm38.p3.genome.fa'
+species2Fasta = '/Users/rhythmicstar/projects/exon_evolution//GRCm38.p3.' \
+                'genome.x15.fa'
 
 
 
@@ -88,7 +92,8 @@ def make_sequence_array(finalproteindf):
 
 
 
-def orthoexon(species1name, species2name, species1DB, species2DB, compara, species1Fasta, species2Fasta):
+def orthoexon(species1name, species2name, species1DB, species2DB, compara,
+              species1Fasta, species2Fasta):
     #Drop compara duplicates
     dropDuplicates = compara.drop_duplicates(['Ensembl Gene ID',
                                           'Ensembl Gene ID.1'])
@@ -143,8 +148,8 @@ def orthoexon(species1name, species2name, species1DB, species2DB, compara, speci
                                                     species2Fasta)
 
                     #create dataframe with protein seq, geneId and exon Id
-                    row = [species2name, str(species2ExonProtein), str(species2geneid),
-                           str(species2Exon['exon_id'][0])]
+                    row = [species2name, str(species2ExonProtein), str
+                    (species2geneid), str(species2Exon['exon_id'][0])]
                     data.append(row)
 
         proteindf = pd.DataFrame(data, columns=['Species', 'Proteins',
@@ -158,7 +163,8 @@ def orthoexon(species1name, species2name, species1DB, species2DB, compara, speci
         output_filename = '{}_Gene_{}-{}_Gene_{}.fasta'.format(
             species1name, str(species1geneid), species2name,
             str(species2EnsGeneId))
-        sys.stdout.write('Writing sequences to "{}" ...\n'.format(output_filename))
+        sys.stdout.write('Writing sequences to "{}" ...\n'.
+                         format(output_filename))
         output_handle = open(output_filename, "w")
         SeqIO.write(sequencearray, output_handle, "fasta")
         output_handle.close()
