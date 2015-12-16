@@ -31,15 +31,16 @@ from Bio.SeqRecord import SeqRecord
 #                                keep_order=True)
 species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
                              'gencode.v19.annotation.humanrbfox2andfmr1.gtf.db'
-                             , keep_order=True)
+                             , keep_order=True) #tester with two genes
 #species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
 #                                '//gencode.vM5.annotation.gtf.db',
 #                                keep_order=True)
 species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
                              'gencode.vM5.annotation.mouserbfox2andfmr1.gtf.db'
-                             , keep_order=True)
+                             , keep_order=True) #Tester with 2 genes
 compara = pd.read_table('/Users/rhythmicstar/projects/exon_evolution/'
                         'EnsemblHumanMouse.txt')
+
 
 #Fasta files with sequence
 #species1Fasta ='/Users/rhythmicstar/projects/exon_evolution//' \
@@ -101,6 +102,9 @@ def make_sequence_array(finalsequencedf):
     return sequence_array
 
 
+#method to create FASTA file with sequences if translateFlag is false and
+#protein sequences if translateFlag is true. Sequences come from homologous
+#genes of both species.
 def orthoexon(species1name, species2name, species1DB, species2DB, compara,
               species1Fasta, species2Fasta, translateFlag):
     #Drop compara duplicates
