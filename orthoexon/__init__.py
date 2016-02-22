@@ -29,29 +29,36 @@ from Bio.SeqRecord import SeqRecord
 #species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
 #                                '//gencode.v19.annotation.gtf.db',
 #                                keep_order=True)
-species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
-                             'gencode.v19.annotation.humanrbfox2andfmr1.gtf.db'
-                             , keep_order=True) #tester with two genes
+#species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
+#                             'gencode.v19.annotation.humanrbfox2andfmr1.gtf.db'
+#                             , keep_order=True) #tester with two genes
 #species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
 #                                '//gencode.vM5.annotation.gtf.db',
 #                                keep_order=True)
-species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
-                             'gencode.vM5.annotation.mouserbfox2andfmr1.gtf.db'
-                             , keep_order=True) #Tester with 2 genes
+#species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
+#                             'gencode.vM5.annotation.mouserbfox2andfmr1.gtf.db'
+#                             , keep_order=True) #Tester with 2 genes
 compara = pd.read_table('/Users/rhythmicstar/projects/exon_evolution/'
                         'EnsemblHumanMouse.txt')
+species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
+                                'gencode.v19.annotation.humanrbfox2and'
+                                'fmr1andsnap25.gtf.db', keep_order=True)
+species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
+                                'gencode.vM5.annotation.mouserbfox2andfmr1and'
+                                'snap25.gtf.db', keep_order=True)
+
 
 
 #Fasta files with sequence
-#species1Fasta ='/Users/rhythmicstar/projects/exon_evolution//' \
-#               'GRCh37.p13.genome.fa'
-species1Fasta = '/Users/rhythmicstar/projects/exon_evolution//GRCh37.p13.' \
-                'genome.x22.fa'
+species1Fasta ='/Users/rhythmicstar/projects/exon_evolution//' \
+               'GRCh37.p13.genome.fa'
+#species1Fasta = '/Users/rhythmicstar/projects/exon_evolution//GRCh37.p13.' \
+#                'genome.x22.fa'
 
-#species2Fasta ='/Users/rhythmicstar/projects/exon_evolution//' \
-#               'GRCm38.p3.genome.fa'
-species2Fasta = '/Users/rhythmicstar/projects/exon_evolution//GRCm38.p3.' \
-                'genome.x15.fa'
+species2Fasta ='/Users/rhythmicstar/projects/exon_evolution//' \
+               'GRCm38.p3.genome.fa'
+#species2Fasta = '/Users/rhythmicstar/projects/exon_evolution//GRCm38.p3.' \
+#                'genome.x15.fa'
 
 
 
@@ -179,7 +186,7 @@ def orthoexon(species1name, species2name, species1DB, species2DB, compara,
                                                 'Gene ID', 'Exon ID'])
 
     #drop duplicates for protein seq
-    sequencedf_noduplicates = sequencedf.drop_duplicates('Sequences')
+    sequencedf_noduplicates = sequencedf.drop_duplicates('Exon ID')
 
     sequencearray = make_sequence_array(sequencedf_noduplicates)
 
