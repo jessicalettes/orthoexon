@@ -4,3 +4,4 @@ blast
 pytest
 flake8
 coverage
+gffutils

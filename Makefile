@@ -4,10 +4,11 @@ help:
 	@echo "coverage - check code coverage quickly"
 
 test:
-	py.test
+	py.test orthoexon
 
 coverage:
-	coverage run --source orthoexon --omit=tests --module py.test
+	coverage run --source orthoexon --omit="*/test*" --module py.test
+	coverage report --show-missing
 
 lint:
 	flake8 orthoexon
