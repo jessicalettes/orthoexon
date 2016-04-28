@@ -1,29 +1,15 @@
 # -*- coding: utf-8 -*-
-
 __author__ = 'Jessica Lettes'
 __email__ = 'jlettes@ucsd.edu'
 __version__ = '0.1.0'
 
 import sys
 
-#imports
-#for gffutils database
 import gffutils
-
-#for pandas data frame
 import pandas as pd
-
-#import Seq for biopython translation
-from Bio.Seq import Seq
-from Bio.Alphabet import generic_dna
-
-#to write files
-import csv
-
-#for FASTA file
 from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 
+from orthoexon.util import separate, translate, getsequence, make_sequence_array
 
 #import gffutils databases and Ensembl compare data as a table
 #species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
@@ -59,54 +45,6 @@ species2Fasta ='/Users/rhythmicstar/projects/exon_evolution//' \
                'GRCm38.p3.genome.fa'
 #species2Fasta = '/Users/rhythmicstar/projects/exon_evolution//GRCm38.p3.' \
 #                'genome.x15.fa'
-
-
-
-#to change gencode gene ids into ensembl gene ids
-def separate(geneId):
-    sep = '.'
-    splitGeneId = geneId.partition(sep)
-    splittingGeneId = splitGeneId[0]
-    sep2 = "'"
-    splitGeneId2 = splittingGeneId.partition(sep2)
-    newGeneId = splitGeneId2[2]
-    return newGeneId
-
-
-# to translate sequence with correct strand and frame
-def translate(exon, fasta):
-    exonFrame = int(exon.frame)
-    exonSeq = exon.sequence(fasta, use_strand=False)
-    exonSeq = Seq(exonSeq, alphabet = generic_dna)
-    if exon.strand == '-':
-        exonSeq = exonSeq.reverse_complement()
-    exonProtein = exonSeq[exonFrame:].translate(to_stop=True)
-    print("{}:{}-{}:{} {}\t{}\t{}".format(exon.chrom, exon.start, exon.stop,
-                                          exon.frame, exon.strand, exonSeq,
-                                          exonProtein))
-    return exonProtein
-
-
-# to get sequence with correct strand and frame
-def getsequence(exon, fasta):
-    exonFrame = int(exon.frame)
-    exonSeq = exon.sequence(fasta, use_strand=False)
-    exonSeq = Seq(exonSeq, alphabet = generic_dna)
-    if exon.strand == '-':
-        exonSeq = exonSeq.reverse_complement()
-    exonSeq = exonSeq[exonFrame:]
-    print("{}:{}-{}:{} {}\t{}".format(exon.chrom, exon.start, exon.stop,
-                                      exon.frame, exon.strand, exonSeq))
-    return exonSeq
-
-
-# to make an array of all exons to make FASTA file
-def make_sequence_array(finalsequencedf):
-    sequence_array = []
-    for index, row in finalsequencedf.iterrows():
-            sequence_array.append(SeqRecord(Seq(row['Sequences']), 
-                                            id=row['Exon ID'], description=''))
-    return sequence_array
 
 
 #method to create FASTA file with sequences if translateFlag is false and
