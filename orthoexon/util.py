@@ -1,5 +1,8 @@
 __author__ = 'rhythmicstar'
 
+from Bio.Seq import Seq
+from Bio.Alphabet import generic_dna
+
 def separate(geneId):
     sep = '.'
     splitGeneId = geneId.partition(sep)
@@ -42,7 +45,7 @@ def translate(exon, fasta):
     return exonProtein
 
 
-#to change gencode gene ids into ensembl gene ids
+# to change gencode gene ids into ensembl gene ids
 def getsequence(exon, fasta):
     exonFrame = int(exon.frame)
     exonSeq = exon.sequence(fasta, use_strand=False)
@@ -55,7 +58,6 @@ def getsequence(exon, fasta):
     return exonSeq
 
 
-#to change gencode gene ids into ensembl gene ids
 def make_sequence_array(finalsequencedf):
     sequence_array = []
     for index, row in finalsequencedf.iterrows():

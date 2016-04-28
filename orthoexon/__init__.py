@@ -11,19 +11,19 @@ from Bio import SeqIO
 
 from orthoexon.util import separate, translate, getsequence, make_sequence_array
 
-#import gffutils databases and Ensembl compare data as a table
-#species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
+# import gffutils databases and Ensembl compare data as a table
+# species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
 #                                '//gencode.v19.annotation.gtf.db',
 #                                keep_order=True)
-#species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
-#                             'gencode.v19.annotation.humanrbfox2andfmr1.gtf.db'
-#                             , keep_order=True) #tester with two genes
-#species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
+# species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
+#                                 '//gencode.v19.annotation.humanrbfox2andfmr'
+#                                 '1.gtf.db', keep_order=True) #testerw/2 genes
+# species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution'
 #                                '//gencode.vM5.annotation.gtf.db',
 #                                keep_order=True)
-#species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
-#                             'gencode.vM5.annotation.mouserbfox2andfmr1.gtf.db'
-#                             , keep_order=True) #Tester with 2 genes
+# species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution
+#                                 '//gencode.vM5.annotation.mouserbfox2andfmr1'
+#                                 '.gtf.db', keep_order=True) #Tester w/2 genes
 compara = pd.read_table('/Users/rhythmicstar/projects/exon_evolution/'
                         'EnsemblHumanMouse.txt')
 species1DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
@@ -35,21 +35,21 @@ species2DB = gffutils.FeatureDB('/Users/rhythmicstar/projects/exon_evolution//'
 
 
 
-#Fasta files with sequence
+# Fasta files with sequence
 species1Fasta ='/Users/rhythmicstar/projects/exon_evolution//' \
                'GRCh37.p13.genome.fa'
-#species1Fasta = '/Users/rhythmicstar/projects/exon_evolution//GRCh37.p13.' \
+# species1Fasta = '/Users/rhythmicstar/projects/exon_evolution//GRCh37.p13.' \
 #                'genome.x22.fa'
 
 species2Fasta ='/Users/rhythmicstar/projects/exon_evolution//' \
                'GRCm38.p3.genome.fa'
-#species2Fasta = '/Users/rhythmicstar/projects/exon_evolution//GRCm38.p3.' \
+# species2Fasta = '/Users/rhythmicstar/projects/exon_evolution//GRCm38.p3.' \
 #                'genome.x15.fa'
 
 
-#method to create FASTA file with sequences if translateFlag is false and
-#protein sequences if translateFlag is true. Sequences come from homologous
-#genes of both species.
+# method to create FASTA file with sequences if translateFlag is false and
+# protein sequences if translateFlag is true. Sequences come from homologous
+# genes of both species.
 def orthoexon(species1name, species2name, species1DB, species2DB, compara,
               species1Fasta, species2Fasta, translateFlag):
     #Drop compara duplicates
@@ -61,17 +61,16 @@ def orthoexon(species1name, species2name, species1DB, species2DB, compara,
 
     gene_dfs = []
 
-    #dataframe for proteins
+    # dataframe for proteins
     data = []
 
-    #for each human gene in gffutils database get gene id
+    # for each human gene in gffutils database get gene id
     for index, species1gene in enumerate(species1DB.features_of_type('gene')):
         species1GFFUtilsGeneId = str(species1gene['gene_id'])
         species1geneid = separate(species1GFFUtilsGeneId)
-        #if(index % 10 == 0):
         print(index)
 
-        #if gene ID equals one from ensembl, get mouse gene ID & exons at point
+        # if gene ID equals one from ensembl, get mouse gene ID & exons @ point
         try:
             species1ensgeneid = comparaGeneIdIndex.loc[species1geneid]
         except KeyError:
@@ -80,7 +79,7 @@ def orthoexon(species1name, species2name, species1DB, species2DB, compara,
         for x in range (0, numcompara):
             if (species1geneid == newCompara.iat[x, 1]):
                 species2EnsGeneId = newCompara.iat[x, 3]
-        #get human exons
+        # get human exons
         for species1Exon in species1DB.children(species1gene,
                                                 featuretype = 'CDS',
                                                 order_by = 'start'):
@@ -95,10 +94,10 @@ def orthoexon(species1name, species2name, species1DB, species2DB, compara,
                        str(species1Exon['exon_id'][0])]
                 data.append(row)
 
-        #CHECK THIS!
-        #for each mouse gene ID from database
+        # CHECK THIS!
+        # for each mouse gene ID from database
         for species2gene in species2DB.features_of_type('gene'):
-            species2GFFUtilsGeneId = str(species2gene['gene_id']) #gffutils id
+            species2GFFUtilsGeneId = str(species2gene['gene_id']) # gffutils id
             species2geneid = separate(species2GFFUtilsGeneId)
             if (species2EnsGeneId == species2geneid):
                 for species2Exon in species2DB.children(species2gene,
@@ -123,12 +122,12 @@ def orthoexon(species1name, species2name, species1DB, species2DB, compara,
         sequencedf = pd.DataFrame(data, columns=['Species', 'Sequences',
                                                 'Gene ID', 'Exon ID'])
 
-    #drop duplicates for protein seq
+    # drop duplicates for protein seq
     sequencedf_noduplicates = sequencedf.drop_duplicates('Exon ID')
 
     sequencearray = make_sequence_array(sequencedf_noduplicates)
 
-    #Write to FASTA
+    # Write to FASTA
     if (translateFlag == True):
         output_filename = '{}_{}_Proteins.fasta'.format(species1name,
                                                         species2name)
@@ -146,7 +145,7 @@ def orthoexon(species1name, species2name, species1DB, species2DB, compara,
     all_gene_dfs = all_gene_dfs.drop_duplicates()
     return all_gene_dfs
 
-    #savesequencedf.to_csv("AllExons.csv", columns= ['Reset Index', 'Proteins',
-    #'Gene Id', 'Exon Id'])
+    # savesequencedf.to_csv("AllExons.csv", columns= ['Reset Index', 'Proteins'
+    # , 'Gene Id', 'Exon Id'])
     # savedroppedsequencedf.to_csv("AlldroppedExons.csv", columns=
     # ['Reset Index', 'Proteins', 'Gene Id', 'Exon Id'])

@@ -6,10 +6,6 @@ import pandas as pd
 import pandas.util.testing as pdt
 import pytest
 
-@pytest.fixture
-def table_folder(data_folder):
-    return os.path.join(data_folder, 'table')
-
 class TestOrthologyTable(object):
     
     @pytest.fixture
